@@ -1,0 +1,12 @@
+#!/bin/bash
+case $1 in
+stop)
+    ps aux | grep -v grep | grep run.py | awk '{print $2}' | xargs kill
+    ;;
+start)
+    python run.py >> dnsweb.access.log 2>&1 &
+    ;;
+*)
+    echo "Usage:named {start|stop}"
+    exit 2;;
+esac

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+		<meta charset="utf-8">
+                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>控制中心 - DNS管理平台</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+		<link href="static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+		<link href="static/css/web.css" rel="stylesheet">
+                <link href="static/images/favicon.ico" mce_href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+		<!--[if lt IE 9]><script src="static/js/html5shiv.min.js"></script><![endif]-->
+	</head>
+	<body>
+		<div class="container">
+			{% include "top_nav.html" %}
+			<div class="row">
+				{% include "nav.html" %}
+				<div class="span10">
+					<h4>
+						控制中心
+					</h4>
+					<div class="well summary">
+						<ul>
+							<li>
+								<a href="/dns/domain"><span class="count">{{count['zone_count']}}</span> 域名</a>
+							</li>
+							<li>
+								<a href="/dns/record"><span class="count">{{count['record_count']}}</span> 记录</a>
+							</li>
+							<li>
+								<a href="/users"><span class="count">{{count['user_count']}}</span> 用户</a>
+							</li>
+							<li class="last">
+								<a href="javascript:void(0);"><span class="count">{{data['uptime']['days']}}天{{data['uptime']['hours']}}小时{{data['uptime']['minutes']}}分钟</span> 运行时间</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+                <div class="span5">
+					<h4>系统信息</h4>
+					<ul class="files zebra-list">
+						<li>
+							<i class="icon-file"></i>
+                            <a class="title" href="javascript:void(0);">主机名</a> {{data['hostname']}}
+                            <a class="btn btn-success" href="javascript:void(0);" title="刷新数据" onclick="location.reload()">Refresh</a>
+                            <a class="btn btn-warning" href="javascript:void(0);" title="重启服务器">Reboot</a>
+                            <a class="btn btn-danger" href="javascript:void(0);" title="关闭服务器">Shutdown</a>
+                            <span class="meta">操作系统 <em>{{data['os']}}</em></span>
+						</li>
+						<li>
+							<i class="icon-map-marker"></i> <a class="title" href="javascript:void(0);">IP地址</a> {{data['ip']}}
+                            <span class="meta">流出流量 <em>{{format_size(data['net']['out'])}}</em> | 流入流量 <em>{{format_size(data['net']['in'])}}</em></span>
+						</li>
+                        <li>
+							<i class="icon-adjust"></i> <a class="title" href="javascript:void(0);">CPU使用率</a> {{data['cpu']}}%
+                            <div class="progress" title="{{data['cpu']}}%"><div class="bar" style="width: {{data['cpu']}}%;"></div></div>
+						</li>
+                        <li>
+							<i class="icon-filter"></i> <a class="title" href="javascript:void(0);">系统空闲率</a> {{data['uptime']['free']}}%
+                            <div class="progress" title="{{data['uptime']['free']}}%"><div class="bar" style="width: {{data['uptime']['free']}}%;"></div></div>
+						</li>
+					</ul>
+                </div>
+                <div class="span5">
+					<h4>系统状态</h4>
+					<ul class="files zebra-list">
+						<li>
+                            {% if data['dnsmasq']['status'] == 0 %}
+                                {% set st_color = 'green' %}
+                                {% set st_msg = '运行中 ...' %}
+                                {% set next_run = 'stop' %}
+                                {% set next_run_msg = '停止' %}
+                            {% else %}
+                                {% set st_color = 'red' %}
+                                {% set st_msg = '服务异常' %}
+                                {% set next_run = 'start' %}
+                                {% set next_run_msg = '启动' %}
+                            {% endif %}
+							<i class="icon-asterisk"></i>
+                            <a class="title" href="javascript:void(0);" onclick="alert('BIND {{st_msg}}')">BIND</a>　<font color="{{st_color}}">{{st_msg}}</font>　
+                            <a class="btn btn-success" href="javascript:void(0);" title="重新加载服务配置" onclick="run_sevice('reload')">Relaod</a>
+                            <a class="btn btn-warning" href="javascript:void(0);" title="重启服务" onclick="run_sevice('restart')">Restart</a>
+                            <a class="btn btn-danger" href="javascript:void(0);" title="{{next_run_msg}}服务" onclick="run_sevice('{{next_run}}')">{{next_run | title}}</a>
+                            <span class="meta">版本 <em>{{data['dnsmasq']['version']}}</em></span>
+						</li>
+						<li>
+							<i class="icon-star-empty"></i> <a class="title" href="javascript:void(0);">系统负载</a>
+                            <span class="meta">1分钟 <em>{{data['load'][0]}}</em> | 5分钟 <em>{{data['load'][1]}}</em> | 15分钟 <em>{{data['load'][2]}}</em></span>
+						</li>
+                        <li>
+							<i class="icon-hdd"></i> <a class="title" href="javascript:void(0);">磁盘使用</a>　{{format_size(data['hdd']['used'])}} / {{format_size(data['hdd']['all'])}} ｜ {{data['hdd']['usedPercent']}}%
+                            <div class="progress" title="{{data['hdd']['usedPercent']}}%"><div class="bar" style="width: {{data['hdd']['usedPercent']}}%;"></div></div>
+						</li>
+                        <li>
+							<i class="icon-road"></i> <a class="title" href="javascript:void(0);">内存使用</a>　{{format_size(data['mem']['MemUsed'])}} / {{format_size(data['mem']['MemTotal'])}} ｜ {{data['mem']['MemUsedPercent']}}%
+                            <div class="progress" title="{{data['mem']['MemUsedPercent']}}%"><div class="bar" style="width: {{data['mem']['MemUsedPercent']}}%;"></div></div>
+						</li>
+					</ul>
+                </div>
+			</div>
+		</div>
+		<script src="static/js/jquery-1.8.3.min.js"></script>
+		<script src="static/bootstrap/js/bootstrap.min.js"></script>
+		<script src="static/js/web.js"></script>
+        {% include "footer.html" %}
+<script type="text/javascript">
+function run_sevice(fun) {
+    $.ajax({
+        type: "GET",
+        url: "/public/api",
+        data: { "module":"dnsmasq","fun":fun },
+        dataType: "text",
+        success: function (msg) {
+            if (msg == "0") {
+                alert("操作成功！");
+                location.reload();
+                return true;
+            } else if (msg == "1") {
+                alert("操作失败！");
+                return false;
+            } else {
+                alert("遇到未知问题！");
+            }
+        },
+        error: function () {
+            alert("提示：服务器内部错误！");
+        },
+    });
+};
+</script>
+</body>
+</html>

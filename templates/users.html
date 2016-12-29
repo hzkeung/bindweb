@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+		<meta charset="utf-8">
+                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>用户管理 - DNS管理平台</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+		<link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+		<link href="/static/css/web.css" rel="stylesheet">
+                <link href="static/images/favicon.ico" mce_href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+	</head>
+	<body>
+		<div class="container">
+			{% include "top_nav.html" %}
+			<div class="row">
+				{% include "nav.html" %}
+				<div class="span10">
+					<h4>
+						用户管理
+					</h4>
+                    <div id="userlist">
+                    <div class="pull-right">
+                        <input type="button" class="btn btn-primary" value="添加用户" onclick="show_add();">
+                    </div><br /><br />
+					<table class="table table-bordered table-striped table-hover table-condensed">
+						<thead>
+							<tr>
+								<td>序号</td>
+								<th>用户名</th>
+                                <th>姓名</th>
+                                <th>邮件地址</th>
+                                <th>手机号</th>
+								<th>创建时间</th>
+								<th>更新时间</th>
+								<th>备注</th>
+                                <th>操作</th>
+							</tr>
+						</thead>
+						<tbody>
+                            <tr id="add_line" class="display_no">
+								<td></td>
+                                <td><input type="text" name="username" id="username"  class="input-mini"></td>
+                                <td><input type="text" name="name" id="name"  class="input-mini"></td>
+                                <td><input type="text" name="email" id="email"  class="input-mini"></td>
+                                <td><input type="text" name="mobile" id="mobile"  class="input-mini"></td>
+                                <td>密码 <input type="password" name="password" id="password"  class="input-mini"></td>
+                                <td>确认密码 <input type="password" name="password2" id="password2"  class="input-mini"></td>
+                                <td><input type="text" name="comment" id="comment"  class="input-mini"></td>
+								<td>
+                                    <a href="javascript:void(0);" class="view-link" onclick="add_user();">保存</a> |
+                                    <a href="javascript:void(0);" class="view-link" onclick="cancel_add();">取消</a>
+                                </td>
+							</tr>
+                            {% for u in users %}
+                            {% if u['status'] == 'yes' %}
+                            <tr id="line_{{u['id']}}">
+                            {% set st_msg = "禁用" %}
+                            {% set fun_value = "no" %}
+                            {% else %}
+							<tr id="line_{{u['id']}}" class="error">
+                            {% set st_msg = "启用" %}
+                            {% set fun_value = "yes" %}
+                            {% endif %}
+								<td>{{ loop.index }}</td>
+                                <td>{{ u['username'] }}</td>
+                                <td>{{ u['name'] }}</td>
+                                <td>{{ u['email'] or '' }}</td>
+                                <td>{{ u['mobile'] or '' }}</td>
+                                <td>{{ u['cdate'] }}</td>
+                                <td>{{ u['mdate'] }}</td>
+                                <td>{{ u['comment'] or '' }}</td>
+                                <td>
+                                    <a href="javascript:void(0);" onclick="to_edit({{u['id']}})">编辑</a> |
+                                    <a href="javascript:void(0);" onclick="ch_pass({{u['id']}},'{{u['username']}}')">密码</a> |
+                                    <a href="/public/api?module=users&fun=ch_status&id={{u['id']}}&value={{fun_value}}" onclick="return confirm('确认{{st_msg}}该用户？');">{{st_msg}}</a> |
+                                    <a href="/public/api?module=users&fun=del&id={{u['id']}}" onclick="return confirm('确认删除该用户？');">删除</a>
+                                </td>
+							</tr>
+                            {# 可编辑状态 #}
+                            <tr id="edit_line_{{u['id']}}" class="display_no">
+                                <td>{{ loop.index }}</td>
+                                <td>{{u['username']}}</td>
+                                <td><input type="text" class="input-mini" value="{{u['name']}}" name="name_{{u['id']}}" id="name_{{u['id']}}"></td>
+                                <td><input type="text" class="input-mini" value="{{u['email'] or ''}}" name="email_{{u['id']}}" id="email_{{u['id']}}"></td>
+                                <td><input type="text" class="input-mini" value="{{u['mobile'] or ''}}" name="mobile_{{u['id']}}" id="mobile_{{u['id']}}"></td>
+                                <td>{{u['cdate']}}</td>
+                                <td>{{u['mdate']}}</td>
+                                <td><input type="text" class="input-mini" value="{{u['comment'] or ''}}" name="comment_{{u['id']}}" id="comment_{{u['id']}}"></td>
+                                <td>
+                                    <a href="javascript:void(0);" onclick="save_info({{u['id']}});">保存</a> |
+                                    <a href="javascript:void(0);" onclick="to_line({{u['id']}})">取消</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+						</tbody>
+					</table>
+                    <ul class="pager">
+						<li class="next">
+							<a href="javascript:void(0)">More >></a>
+						</li>
+					</ul>
+                    </div>
+                    <form class="form-horizontal display_no" id="pass_form" method="post">
+						<fieldset>
+                            <div class="control-group">
+								<label class="control-label" for="cur_uid">UID</label>
+								<div class="controls">
+									<input type="text" class="input-xlarge" id="cur_uid" name="cur_uid" readonly/>
+								</div>
+							</div>
+                            <div class="control-group">
+								<label class="control-label" for="cur_user">用户名</label>
+								<div class="controls">
+									<input type="text" class="input-xlarge" id="cur_user" name="cur_user" readonly/>
+								</div>
+							</div>
+                            <div class="control-group">
+								<label class="control-label" for="oldpass">原始密码</label>
+								<div class="controls">
+									<input type="text" class="input-xlarge" id="oldpass" name="oldpass" readonly/>
+								</div>
+							</div>
+                            <div class="control-group">
+								<label class="control-label" for="newpass">新密码</label>
+								<div class="controls">
+									<input type="password" class="input-xlarge" id="newpass" name="newpass"/>
+								</div>
+							</div>
+                            <div class="control-group">
+								<label class="control-label" for="newpass2">确认新密码</label>
+								<div class="controls">
+									<input type="password" class="input-xlarge" id="newpass2" name="newpass2"/>
+								</div>
+							</div>
+							<div class="form-actions">
+								<a href="javascript:void(0)" class="btn" onclick="cancel_pass();">取 消</a>　　
+                                <a href="javascript:void(0);" class="btn btn-primary" onclick="save_pass()">保 存</a>
+							</div>
+						</fieldset>
+					</form>
+
+				</div>
+			</div>
+		</div>
+		<script src="/static/js/jquery-1.8.3.min.js"></script>
+		<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+		<script src="/static/js/web.js"></script>
+        <script src="/static/js/users.js"></script>
+        {% include "footer.html" %}
+	</body>
+</html>

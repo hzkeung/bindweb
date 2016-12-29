@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+		<meta charset="utf-8">
+		<title>登录 - DNS管理平台</title>
+                <link href="static/images/favicon.ico" mce_href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+		<link href="{{ static_url('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+        <link href="{{ static_url('css/login.css') }}" rel="stylesheet">
+	</head>
+	<body>
+		<div id="login-page" class="container">
+        <form method="post">
+        <section class="loginBox span7">
+            <h2>欢迎使用DNS管理平台</h2>
+            <p><span>用户名</span><input type="text" name="username" placeholder="Username"/></p>
+            <p><span>密　码</span><input type="password" name="password" placeholder="Password"/></p>
+            <section class="row-fluid">
+                <section class="span8"><label><input type="checkbox" name="remember" value="yes"/> 记住登录</label></section>
+                <section class="span1"><input type="submit" value="登　录" class="btn btn-primary"></section>
+            </section>
+        </section>
+        </form>
+        </div>
+        <div class="LoginFooter">
+            <a style="text-decoration:blink;">2016 © 运维团队</a>
+        </div>
+	</body>
+</html>
