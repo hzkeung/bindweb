@@ -1,5 +1,6 @@
 ### 关于bindweb
-bindweb基于开源项目DNSmasqWeb进行二次开发, bindweb用于管理bind的dns记录, 在这里要感谢DNSmasqWeb的作者luxiaok
+bindweb基于开源项目DNSmasqWeb进行二次开发, bindweb用于管理bind的dns记录, 在这里要感谢DNSmasqWeb的作者luxiaok.
+系统默认用户和密码均为admin
 
 ### 安装
 ```
